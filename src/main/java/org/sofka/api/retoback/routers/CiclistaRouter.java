@@ -2,6 +2,7 @@ package org.sofka.api.retoback.routers;
 
 import org.sofka.api.retoback.models.CiclistaDTO;
 import org.sofka.api.retoback.usecase.ciclistaUseCase.AgregarCiclistaUseCase;
+import org.sofka.api.retoback.usecase.ciclistaUseCase.EliminarCiclistaUseCase;
 import org.sofka.api.retoback.usecase.ciclistaUseCase.ObtenerCiclistaUseCase;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,5 +42,15 @@ public class CiclistaRouter {
                         .body(BodyInserters.fromPublisher(useCase.get(), CiclistaDTO.class))
         );
     }
-
+    @Bean
+    public RouterFunction<ServerResponse> delete(EliminarCiclistaUseCase deleteUseCase) {
+        return route(
+                DELETE("/eliminar/{id}").and(accept(MediaType.APPLICATION_JSON)),
+                request -> ServerResponse.accepted()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(BodyInserters.fromPublisher(deleteUseCase.apply(request.pathVariable("id")), Void.class))
+        );
+    }
 }
+
+
