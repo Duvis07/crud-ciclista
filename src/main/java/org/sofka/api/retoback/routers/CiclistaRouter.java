@@ -1,6 +1,7 @@
 package org.sofka.api.retoback.routers;
 
 import org.sofka.api.retoback.models.CiclistaDTO;
+import org.sofka.api.retoback.usecase.ciclistaUseCase.ActualizarCiclistaUseCase;
 import org.sofka.api.retoback.usecase.ciclistaUseCase.AgregarCiclistaUseCase;
 import org.sofka.api.retoback.usecase.ciclistaUseCase.EliminarCiclistaUseCase;
 import org.sofka.api.retoback.usecase.ciclistaUseCase.ObtenerCiclistaUseCase;
@@ -42,6 +43,7 @@ public class CiclistaRouter {
                         .body(BodyInserters.fromPublisher(useCase.get(), CiclistaDTO.class))
         );
     }
+
     @Bean
     public RouterFunction<ServerResponse> delete(EliminarCiclistaUseCase deleteUseCase) {
         return route(
@@ -51,6 +53,18 @@ public class CiclistaRouter {
                         .body(BodyInserters.fromPublisher(deleteUseCase.apply(request.pathVariable("id")), Void.class))
         );
     }
-}
 
+    @Bean
+    public RouterFunction<ServerResponse> actualizarCiclista(ActualizarCiclistaUseCase useCase) {
+        Function<CiclistaDTO, Mono<ServerResponse>> executor = ciclistaDTO -> useCase.apply(ciclistaDTO)
+                .flatMap(result -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(result));
+
+        return route(
+                PUT("/actualizarCiclista/{id}").and(accept(MediaType.APPLICATION_JSON)),
+                request -> request.bodyToMono(CiclistaDTO.class).flatMap(executor)
+        );
+    }
+}
 
